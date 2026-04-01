@@ -6,7 +6,7 @@ import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { KDV_ORANI, DURUM_ETIKETLERI } from "@/lib/constants";
+import { DURUM_ETIKETLERI } from "@/lib/constants";
 import {
   ArrowLeft,
   FileText,
@@ -17,8 +17,18 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  Send,
+  Phone,
+  Mail,
+  MapPin,
+  Hash,
+  Users,
+  TrendingUp,
+  TestTube2,
+  Copy,
+  Edit,
 } from "lucide-react";
-import { exportTableToPDF } from "@/lib/export";
+import { exportTableToPDF, generateTeklifPDF } from "@/lib/export";
 
 const durumRenkleri: Record<string, string> = {
   TASLAK: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
@@ -29,7 +39,7 @@ const durumRenkleri: Record<string, string> = {
 
 const durumIconlari: Record<string, typeof Clock> = {
   TASLAK: Clock,
-  GÖNDERİLDİ: Clock,
+  GÖNDERİLDİ: Send,
   KABUL_EDİLDİ: CheckCircle2,
   REDDEDİLDİ: XCircle,
 };
@@ -40,7 +50,6 @@ export default function TeklifDetayPage() {
   const { teklifler, teklifGuncelle, firmalar } = useStore();
 
   const teklif = teklifler.find((t) => t.id === params.id);
-
   if (!teklif) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -58,45 +67,59 @@ export default function TeklifDetayPage() {
   const DurumIcon = durumIconlari[teklif.durum] || Clock;
 
   const handlePDFExport = () => {
-    const headers = ["Test", "Miktar", "Birim Fiyat", "İndirim", "Toplam"];
-    const rows = teklif.kalemler.map((k) => [
-      k.testAdi,
-      String(k.miktar),
-      formatPara(k.birimFiyat),
-      `%${k.indirimYuzde}`,
-      formatPara(k.toplam),
-    ]);
-    rows.push(["", "", "", "Ara Toplam:", formatPara(teklif.araToplam)]);
-    rows.push(["", "", "", `KDV (%${teklif.kdvYuzde}):`, formatPara(teklif.kdvTutar)]);
-    rows.push(["", "", "", "Genel Toplam:", formatPara(teklif.genelToplam)]);
-    exportTableToPDF(headers, rows, `teklif_${teklif.id}`, `Fiyat Teklifi - ${teklif.firmaAdi || "Firma"}`);
+    generateTeklifPDF({
+      teklifNo: teklif.id,
+      firmaAdi: teklif.firmaAdi || "",
+      firmaVergiNo: firma?.vergiNo,
+      firmaAdres: firma ? `${firma.il}, ${firma.ilce}` : undefined,
+      firmaTelefon: firma?.telefon,
+      firmaEmail: firma?.email,
+      firmaCalisanSayisi: firma?.calisanSayisi,
+      tarih: teklif.olusturmaTarihi,
+      gecerlilikTarihi: teklif.gecerlilikTarihi,
+      durum: teklif.durum,
+      kdvYuzde: teklif.kdvYuzde,
+      kalemler: teklif.kalemler,
+      araToplam: teklif.araToplam,
+      kdvTutar: teklif.kdvTutar,
+      genelToplam: teklif.genelToplam,
+      notlar: teklif.notlar,
+      osGBAdi: "OSGB Sağlık Hizmetleri",
+      osGBTelefon: "0212 555 55 55",
+      osGBEmail: "info@osgb.com",
+      osGBAdres: "İstanbul, Türkiye",
+    });
   };
 
   const handleDurumDegistir = (yeniDurum: string) => {
     teklifGuncelle(teklif.id, { durum: yeniDurum as any });
   };
 
+  const gecerlilikKalan = teklif.gecerlilikTarihi ? Math.ceil((new Date(teklif.gecerlilikTarihi).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Başlık */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight">Teklif #{teklif.id}</h2>
-            <Badge className={durumRenkleri[teklif.durum] || ""}>
-              <DurumIcon className="mr-1 h-3 w-3" />
-              {DURUM_ETIKETLERI[teklif.durum] || teklif.durum}
-            </Badge>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-4 flex-1">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold tracking-tight">Teklif #{teklif.id}</h2>
+              <Badge className={durumRenkleri[teklif.durum] || ""}>
+                <DurumIcon className="mr-1 h-3 w-3" />
+                {DURUM_ETIKETLERI[teklif.durum] || teklif.durum}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">{teklif.firmaAdi}</p>
           </div>
-          <p className="text-muted-foreground">{teklif.firmaAdi}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={handlePDFExport}>
             <Download className="mr-2 h-4 w-4" />
-            PDF İndir
+            PDF
           </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-2 h-4 w-4" />
@@ -104,7 +127,7 @@ export default function TeklifDetayPage() {
           </Button>
           {teklif.durum === "TASLAK" && (
             <Button size="sm" onClick={() => handleDurumDegistir("GÖNDERİLDİ")}>
-              <Clock className="mr-2 h-4 w-4" />
+              <Send className="mr-2 h-4 w-4" />
               Gönder
             </Button>
           )}
@@ -121,6 +144,70 @@ export default function TeklifDetayPage() {
             </>
           )}
         </div>
+      </div>
+
+      {/* İstatistik Kartları */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
+        <Card className="card-hover">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Genel Toplam</p>
+                <p className="text-2xl font-bold text-primary">{formatPara(teklif.genelToplam)}</p>
+              </div>
+              <div className="rounded-xl p-3 bg-green-100 text-green-600 dark:bg-green-950/50 dark:text-green-400">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Kalem Sayısı</p>
+                <p className="text-2xl font-bold">{teklif.kalemler.length}</p>
+              </div>
+              <div className="rounded-xl p-3 bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+                <TestTube2 className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Geçerlilik</p>
+                <p className="text-2xl font-bold">
+                  {gecerlilikKalan !== null ? (
+                    <span className={gecerlilikKalan > 0 ? "text-green-600" : "text-red-600"}>
+                      {gecerlilikKalan > 0 ? `${gecerlilikKalan} gün` : "Süresi doldu"}
+                    </span>
+                  ) : "-"}
+                </p>
+              </div>
+              <div className="rounded-xl p-3 bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+                <Calendar className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Toplam Kişi</p>
+                <p className="text-2xl font-bold">
+                  {teklif.kalemler.length > 0 ? teklif.kalemler[0]?.miktar || "-" : "-"}
+                </p>
+              </div>
+              <div className="rounded-xl p-3 bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400">
+                <Users className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -168,7 +255,6 @@ export default function TeklifDetayPage() {
               </table>
             </div>
 
-            {/* Toplam */}
             <div className="mt-4 flex flex-col items-end gap-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center gap-8 text-sm">
                 <span className="text-muted-foreground">Ara Toplam:</span>
@@ -198,22 +284,45 @@ export default function TeklifDetayPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-xs text-muted-foreground">Firma</p>
+                <p className="text-xs text-muted-foreground">Firma Adı</p>
                 <p className="font-semibold">{teklif.firmaAdi}</p>
               </div>
               {firma && (
                 <>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Yetkili</p>
-                    <p className="font-medium">{firma.yetkiliKisi}</p>
+                  <div className="flex items-center gap-2">
+                    <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Vergi No</p>
+                      <p className="text-sm font-medium">{firma.vergiNo}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Telefon</p>
-                    <p className="font-medium">{firma.telefon}</p>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Çalışan Sayısı</p>
+                      <p className="text-sm font-medium">{firma.calisanSayisi}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">E-posta</p>
-                    <p className="font-medium">{firma.email}</p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Telefon</p>
+                      <p className="text-sm font-medium">{firma.telefon}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">E-posta</p>
+                      <p className="text-sm font-medium">{firma.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Adres</p>
+                      <p className="text-sm font-medium">{firma.il}, {firma.ilce}</p>
+                    </div>
                   </div>
                 </>
               )}
@@ -230,16 +339,16 @@ export default function TeklifDetayPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Kalem Sayısı</span>
-                <span className="font-medium">{teklif.kalemler.length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Oluşturulma</span>
                 <span className="font-medium">{teklif.olusturmaTarihi}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Geçerlilik</span>
                 <span className="font-medium">{teklif.gecerlilikTarihi}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">KDV Oranı</span>
+                <span className="font-medium">%{teklif.kdvYuzde}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Durum</span>
@@ -254,10 +363,13 @@ export default function TeklifDetayPage() {
           {teklif.notlar && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Notlar</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Ön Yazı
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{teklif.notlar}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{teklif.notlar}</p>
               </CardContent>
             </Card>
           )}

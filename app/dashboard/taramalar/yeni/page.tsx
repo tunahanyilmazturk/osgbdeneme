@@ -46,9 +46,7 @@ export default function YeniTaramaPage() {
 
   const aktifFirmalar = firmalar.filter((f) => f.durum === "AKTIF");
   const aktifTestler = saglikTestleri.filter((t) => t.durum === "AKTIF");
-  const firmaPersonelleri = form.firmaId
-    ? personeller.filter((p) => p.firmaId === form.firmaId && p.durum === "AKTIF")
-    : [];
+  const aktifPersoneller = personeller.filter((p) => p.durum === "AKTIF");
 
   const togglePersonel = (id: string) => {
     setForm((prev) => ({
@@ -71,7 +69,7 @@ export default function YeniTaramaPage() {
   const tumunuSecPersonel = () => {
     setForm((prev) => ({
       ...prev,
-      personelIds: firmaPersonelleri.map((p) => p.id),
+      personelIds: aktifPersoneller.map((p) => p.id),
     }));
   };
 
@@ -165,9 +163,9 @@ export default function YeniTaramaPage() {
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Önce firma seçiniz
                 </p>
-              ) : firmaPersonelleri.length === 0 ? (
+              ) : aktifPersoneller.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Bu firmada kayıtlı personel bulunmuyor
+                  Kayıtlı aktif çalışan bulunmuyor
                 </p>
               ) : (
                 <>
@@ -180,7 +178,7 @@ export default function YeniTaramaPage() {
                     </Button>
                   </div>
                   <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-3">
-                    {firmaPersonelleri.map((personel) => (
+                    {aktifPersoneller.map((personel) => (
                       <label
                         key={personel.id}
                         className="flex items-center gap-3 cursor-pointer rounded-lg p-2 hover:bg-accent transition-colors"
@@ -242,7 +240,7 @@ export default function YeniTaramaPage() {
                     <div className="flex-1">
                       <p className="text-sm font-medium">{test.ad}</p>
                       <p className="text-xs text-muted-foreground">
-                        {test.kategoriAdi} - {test.periyot} günde bir
+                        {test.kategoriAdi}
                       </p>
                     </div>
                   </label>

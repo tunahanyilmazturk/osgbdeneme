@@ -79,7 +79,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
       sonuclar.push({
         id: `p-${p.id}`,
         baslik: `${p.ad} ${p.soyad}`,
-        altBaslik: `${p.pozisyon} - ${p.firmaAdi || "Firma yok"}`,
+        altBaslik: `${p.pozisyon}`,
         icon: Users,
         href: `/dashboard/personel/${p.id}`,
         kategori: "Personel",

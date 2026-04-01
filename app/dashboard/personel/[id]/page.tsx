@@ -11,23 +11,21 @@ import {
   Users,
   Phone,
   Mail,
-  Building2,
   Calendar,
   Briefcase,
-  Hash,
 } from "lucide-react";
 
 export default function PersonelDetayPage() {
   const router = useRouter();
   const params = useParams();
-  const { personeller, firmalar, randevular } = useStore();
+  const { personeller } = useStore();
 
   const personel = personeller.find((p) => p.id === params.id);
   if (!personel) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Users className="mb-4 h-12 w-12 text-muted-foreground" />
-        <p className="text-muted-foreground">Personel bulunamadı.</p>
+        <p className="text-muted-foreground">Çalışan bulunamadı.</p>
         <Button className="mt-4" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Geri Dön
@@ -35,9 +33,6 @@ export default function PersonelDetayPage() {
       </div>
     );
   }
-
-  const firma = firmalar.find((f) => f.id === personel.firmaId);
-  const personelRandevulari = randevular.filter((r) => r.personelId === personel.id);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -62,22 +57,15 @@ export default function PersonelDetayPage() {
         {/* Kişisel Bilgiler */}
         <Card className="lg:col-span-2">
           <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Kişisel Bilgiler</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/personel/${personel.id}/duzenle`)}>
-                  Düzenle
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <Hash className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">TC Kimlik</p>
-                  <p className="font-medium">{personel.tcKimlik}</p>
-                </div>
-              </div>
+            <div className="flex items-center justify-between">
+              <CardTitle>Kişisel Bilgiler</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/personel/${personel.id}/duzenle`)}>
+                Düzenle
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -96,7 +84,7 @@ export default function PersonelDetayPage() {
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">E-posta</p>
-                  <p className="font-medium">{personel.email}</p>
+                  <p className="font-medium">{personel.email || "-"}</p>
                 </div>
               </div>
             </div>
@@ -108,21 +96,10 @@ export default function PersonelDetayPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Building2 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <Briefcase className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Firma</p>
-                  <p className="font-semibold">{firma?.ad || personel.firmaAdi}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Briefcase className="h-8 w-8 text-green-600 dark:text-green-400" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Departman</p>
-                  <p className="font-semibold">{personel.departman}</p>
+                  <p className="text-sm text-muted-foreground">Pozisyon</p>
+                  <p className="font-semibold">{personel.pozisyon}</p>
                 </div>
               </div>
             </CardContent>
@@ -133,18 +110,7 @@ export default function PersonelDetayPage() {
                 <Calendar className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 <div>
                   <p className="text-sm text-muted-foreground">İşe Giriş</p>
-                  <p className="font-semibold">{personel.isegirisTarihi}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Randevular</p>
-                  <p className="font-semibold">{personelRandevulari.length} adet</p>
+                  <p className="font-semibold">{personel.isegirisTarihi || "-"}</p>
                 </div>
               </div>
             </CardContent>

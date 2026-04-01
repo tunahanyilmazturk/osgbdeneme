@@ -8,21 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { TEST_KATEGORILERI } from "@/lib/constants";
 import type { GenelDurum } from "@/types";
-import { ArrowLeft, Save, DollarSign, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Save, DollarSign } from "lucide-react";
 
 export default function YeniTestPage() {
   const router = useRouter();
-  const { testEkle } = useStore();
+  const { testEkle, testKategorileri } = useStore();
 
   const [form, setForm] = useState({
     ad: "",
     kategoriId: "",
-    aciklama: "",
     birimFiyat: 0,
-    sure: 15,
-    periyot: 365,
     durum: "AKTIF" as GenelDurum,
   });
 
@@ -71,18 +67,8 @@ export default function YeniTestPage() {
                 <Select
                   value={form.kategoriId}
                   onChange={(e) => handleChange("kategoriId", e.target.value)}
-                  options={TEST_KATEGORILERI.map((k) => ({ value: k.id, label: k.ad }))}
+                  options={testKategorileri.map((k) => ({ value: k.id, label: k.ad }))}
                   placeholder="Kategori seçiniz"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Açıklama *</label>
-                <textarea
-                  value={form.aciklama}
-                  onChange={(e) => handleChange("aciklama", e.target.value)}
-                  placeholder="Test hakkında kısa açıklama..."
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   required
                 />
               </div>
@@ -102,7 +88,7 @@ export default function YeniTestPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Fiyat ve Süre</CardTitle>
+              <CardTitle>Fiyat</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -125,38 +111,6 @@ export default function YeniTestPage() {
                   </p>
                 )}
               </div>
-              <div>
-                <label className="text-sm font-medium flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  Tahmini Süre (dakika) *
-                </label>
-                <Input
-                  type="number"
-                  value={form.sure}
-                  onChange={(e) => handleChange("sure", parseInt(e.target.value) || 0)}
-                  min={1}
-                  required
-                />
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Yaklaşık {Math.floor(form.sure / 60)} saat {form.sure % 60} dakika
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Periyot (gün) *
-                </label>
-                <Input
-                  type="number"
-                  value={form.periyot}
-                  onChange={(e) => handleChange("periyot", parseInt(e.target.value) || 1)}
-                  min={1}
-                  required
-                />
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {form.periyot} günde bir tekrarlanacak ({(form.periyot / 30).toFixed(1)} ay)
-                </p>
-              </div>
 
               {/* Önizleme */}
               <div className="rounded-lg border bg-muted/50 p-4">
@@ -164,8 +118,6 @@ export default function YeniTestPage() {
                 <div className="space-y-1 text-sm">
                   <p><span className="text-muted-foreground">Ad:</span> {form.ad || "-"}</p>
                   <p><span className="text-muted-foreground">Fiyat:</span> {form.birimFiyat > 0 ? formatPara(form.birimFiyat) : "-"}</p>
-                  <p><span className="text-muted-foreground">Süre:</span> {form.sure} dk</p>
-                  <p><span className="text-muted-foreground">Periyot:</span> {form.periyot} gün</p>
                 </div>
               </div>
             </CardContent>

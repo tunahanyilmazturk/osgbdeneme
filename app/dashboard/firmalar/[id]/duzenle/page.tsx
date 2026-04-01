@@ -7,14 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { SEKTOR_LISTESI, ILLER } from "@/lib/constants";
+import { ILLER } from "@/lib/constants";
 import type { GenelDurum } from "@/types";
 import { ArrowLeft, Save, Building2 } from "lucide-react";
 
 export default function FirmaDuzenlePage() {
   const router = useRouter();
   const params = useParams();
-  const { firmalar, firmaGuncelle } = useStore();
+  const { firmalar, firmaGuncelle, sektorler } = useStore();
 
   const firma = firmalar.find((f) => f.id === params.id);
 
@@ -118,7 +118,7 @@ export default function FirmaDuzenlePage() {
                 <Select
                   value={form.sektor}
                   onChange={(e) => handleChange("sektor", e.target.value)}
-                  options={SEKTOR_LISTESI.map((s) => ({ value: s, label: s }))}
+                  options={sektorler.map((s) => ({ value: s, label: s }))}
                   placeholder="Sektör seçiniz"
                   required
                 />

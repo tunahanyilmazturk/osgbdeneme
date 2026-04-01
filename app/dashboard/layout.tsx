@@ -18,8 +18,8 @@ export default function DashboardLayout({
       <div className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-72"}`}>
         <Header />
         
-        <main className="flex-1 overflow-y-auto bg-background gradient-mesh p-4 lg:p-6">
-          <div className="mx-auto max-w-7xl">{children}</div>
+        <main className="flex-1 overflow-y-auto bg-background gradient-mesh p-2 lg:p-3">
+          <div className="w-full">{children}</div>
         </main>
       </div>
     </div>

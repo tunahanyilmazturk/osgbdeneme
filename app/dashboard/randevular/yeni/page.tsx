@@ -68,9 +68,7 @@ export default function YeniRandevuPage() {
 
   const aktifFirmalar = firmalar.filter((f) => f.durum === "AKTIF");
   const aktifTestler = saglikTestleri.filter((t) => t.durum === "AKTIF");
-  const firmaPersonelleri = form.firmaId
-    ? personeller.filter((p) => p.firmaId === form.firmaId && p.durum === "AKTIF")
-    : [];
+  const aktifPersoneller = personeller.filter((p) => p.durum === "AKTIF");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -113,17 +111,12 @@ export default function YeniRandevuPage() {
                 <Select
                   value={form.personelId}
                   onChange={(e) => handleChange("personelId", e.target.value)}
-                  options={firmaPersonelleri.map((p) => ({
+                  options={aktifPersoneller.map((p) => ({
                     value: p.id,
                     label: `${p.ad} ${p.soyad} - ${p.pozisyon}`,
                   }))}
                   placeholder="Personel seçiniz (opsiyonel)"
                 />
-                {!form.firmaId && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Önce firma seçiniz
-                  </p>
-                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Sağlık Testi *</label>

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Kullanici, Firma, Personel, SaglikTesti, Randevu, FiyatTeklifi, Tarama, Bildirim, DashboardIstatistik } from "@/types";
+import type { Kullanici, Firma, Personel, SaglikTesti, Randevu, FiyatTeklifi, Tarama, Bildirim, DashboardIstatistik, Pozisyon } from "@/types";
 
 // Mock veriler
 const mockKullanici: Kullanici = {
@@ -69,15 +69,11 @@ const mockPersoneller: Personel[] = [
     id: "1",
     ad: "Zeynep",
     soyad: "Arslan",
-    tcKimlik: "12345678901",
     telefon: "0532 111 2233",
     email: "zeynep@example.com",
     dogumTarihi: "1990-05-15",
     isegirisTarihi: "2020-03-01",
-    pozisyon: "Muhasebe Uzmanı",
-    departman: "Finans",
-    firmaId: "1",
-    firmaAdi: "ABC Tekstil San. ve Tic. A.Ş.",
+    pozisyon: "Sağlık Teknikeri",
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-15",
   },
@@ -85,15 +81,11 @@ const mockPersoneller: Personel[] = [
     id: "2",
     ad: "Can",
     soyad: "Yıldız",
-    tcKimlik: "23456789012",
     telefon: "0533 222 3344",
     email: "can@example.com",
     dogumTarihi: "1988-08-20",
     isegirisTarihi: "2019-06-15",
-    pozisyon: "Üretim Şefi",
-    departman: "Üretim",
-    firmaId: "1",
-    firmaAdi: "ABC Tekstil San. ve Tic. A.Ş.",
+    pozisyon: "Radyoloji Teknikeri",
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-15",
   },
@@ -105,10 +97,7 @@ const mockSaglikTestleri: SaglikTesti[] = [
     ad: "Tam Kan Sayımı",
     kategoriId: "1",
     kategoriAdi: "Biyokimyasal Testler",
-    aciklama: "Hemoglobin, lökosit, trombosit sayımları",
     birimFiyat: 150,
-    sure: 15,
-    periyot: 365,
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-01",
   },
@@ -117,10 +106,7 @@ const mockSaglikTestleri: SaglikTesti[] = [
     ad: "Akciğer Grafisi",
     kategoriId: "2",
     kategoriAdi: "Radyolojik Testler",
-    aciklama: "Göğüs radyografisi çekimi",
     birimFiyat: 200,
-    sure: 20,
-    periyot: 365,
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-01",
   },
@@ -129,10 +115,7 @@ const mockSaglikTestleri: SaglikTesti[] = [
     ad: "Fizik Muayene",
     kategoriId: "3",
     kategoriAdi: "Fizik Muayene",
-    aciklama: "Genel fiziksel muayene",
     birimFiyat: 100,
-    sure: 30,
-    periyot: 365,
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-01",
   },
@@ -141,10 +124,7 @@ const mockSaglikTestleri: SaglikTesti[] = [
     ad: "İşitme Testi",
     kategoriId: "4",
     kategoriAdi: "Odyometri",
-    aciklama: "Odyometrik işitme testi",
     birimFiyat: 180,
-    sure: 25,
-    periyot: 365,
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-01",
   },
@@ -153,10 +133,7 @@ const mockSaglikTestleri: SaglikTesti[] = [
     ad: "Akciğer Fonksiyon Testi",
     kategoriId: "5",
     kategoriAdi: "Spirometri",
-    aciklama: "Spirometrik akciğer fonksiyon testi",
     birimFiyat: 250,
-    sure: 30,
-    periyot: 365,
     durum: "AKTIF",
     olusturmaTarihi: "2024-01-01",
   },
@@ -281,7 +258,7 @@ interface AppState {
 
   // Personeller
   personeller: Personel[];
-  personelEkle: (personel: Omit<Personel, "id" | "olusturmaTarihi" | "firmaAdi">) => void;
+  personelEkle: (personel: Omit<Personel, "id" | "olusturmaTarihi">) => void;
   personelGuncelle: (id: string, personel: Partial<Personel>) => void;
   personelSil: (id: string) => void;
 
@@ -313,6 +290,17 @@ interface AppState {
   bildirimler: Bildirim[];
   bildirimEkle: (bildirim: Omit<Bildirim, "id" | "olusturmaTarihi">) => void;
   bildirimOkundu: (id: string) => void;
+
+  // Tanımlar
+  testKategorileri: { id: string; ad: string }[];
+  pozisyonlar: string[];
+  sektorler: string[];
+  kategoriEkle: (ad: string) => void;
+  kategoriSil: (id: string) => void;
+  pozisyonEkle: (ad: string) => void;
+  pozisyonSil: (index: number) => void;
+  sektorEkle: (ad: string) => void;
+  sektorSil: (index: number) => void;
 
   // İstatistikler
   istatistikler: DashboardIstatistik;
@@ -362,10 +350,8 @@ export const useStore = create<AppState>()(
       // Personeller
       personeller: mockPersoneller,
       personelEkle: (personel) => {
-        const firma = get().firmalar.find((f) => f.id === personel.firmaId);
         const yeniPersonel: Personel = {
           ...personel,
-          firmaAdi: firma?.ad,
           id: Math.random().toString(36).substring(2, 15),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
@@ -429,10 +415,11 @@ export const useStore = create<AppState>()(
       teklifler: mockTeklifler,
       teklifEkle: (teklif) => {
         const firma = get().firmalar.find((f) => f.id === teklif.firmaId);
+        const teklifNo = String(get().teklifler.length + 1).padStart(3, "0");
         const yeniTeklif: FiyatTeklifi = {
           ...teklif,
           firmaAdi: firma?.ad,
-          id: Math.random().toString(36).substring(2, 15),
+          id: `TKL-${teklifNo}`,
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ teklifler: [...state.teklifler, yeniTeklif] }));
@@ -482,6 +469,70 @@ export const useStore = create<AppState>()(
       bildirimOkundu: (id) => {
         set((state) => ({
           bildirimler: state.bildirimler.map((b) => (b.id === id ? { ...b, okundu: true } : b)),
+        }));
+      },
+
+      // Tanımlar
+      testKategorileri: [
+        { id: "1", ad: "Biyokimyasal Testler" },
+        { id: "2", ad: "Radyolojik Testler" },
+        { id: "3", ad: "Fizik Muayene" },
+        { id: "4", ad: "Odyometri" },
+        { id: "5", ad: "Spirometri" },
+        { id: "6", ad: "EKG" },
+      ],
+      pozisyonlar: [
+        "Sağlık Teknikeri",
+        "Radyoloji Teknikeri",
+        "Laborant",
+        "Odyometrist",
+        "Hemşire",
+        "Diğer Sağlık Personeli",
+        "Müdür",
+        "İş Yeri Hekimi",
+        "İş Güvenliği Uzmanı",
+        "Sekreter",
+      ],
+      sektorler: [
+        "İmalat",
+        "İnşaat",
+        "Ticaret",
+        "Hizmet",
+        "Eğitim",
+        "Sağlık",
+        "Ulaştırma",
+        "Bilişim",
+        "Turizm",
+        "Diğer",
+      ],
+      kategoriEkle: (ad) => {
+        set((state) => ({
+          testKategorileri: [...state.testKategorileri, { id: Math.random().toString(36).substring(2, 15), ad }],
+        }));
+      },
+      kategoriSil: (id) => {
+        set((state) => ({
+          testKategorileri: state.testKategorileri.filter((k) => k.id !== id),
+        }));
+      },
+      pozisyonEkle: (ad) => {
+        set((state) => ({
+          pozisyonlar: [...state.pozisyonlar, ad],
+        }));
+      },
+      pozisyonSil: (index) => {
+        set((state) => ({
+          pozisyonlar: state.pozisyonlar.filter((_, i) => i !== index),
+        }));
+      },
+      sektorEkle: (ad) => {
+        set((state) => ({
+          sektorler: [...state.sektorler, ad],
+        }));
+      },
+      sektorSil: (index) => {
+        set((state) => ({
+          sektorler: state.sektorler.filter((_, i) => i !== index),
         }));
       },
 

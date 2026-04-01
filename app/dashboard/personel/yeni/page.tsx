@@ -12,33 +12,37 @@ import { ArrowLeft, Save } from "lucide-react";
 
 export default function YeniPersonelPage() {
   const router = useRouter();
-  const { personelEkle, firmalar } = useStore();
+  const { personelEkle, pozisyonlar } = useStore();
 
   const [form, setForm] = useState({
     ad: "",
     soyad: "",
-    tcKimlik: "",
     telefon: "",
     email: "",
     dogumTarihi: "",
     isegirisTarihi: "",
     pozisyon: "",
-    departman: "",
-    firmaId: "",
     durum: "AKTIF" as GenelDurum,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    personelEkle(form);
+    personelEkle({
+      ad: form.ad,
+      soyad: form.soyad,
+      telefon: form.telefon,
+      email: form.email || undefined,
+      dogumTarihi: form.dogumTarihi,
+      isegirisTarihi: form.isegirisTarihi || undefined,
+      pozisyon: form.pozisyon,
+      durum: form.durum,
+    });
     router.push("/dashboard/personel");
   };
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
-
-  const aktifFirmalar = firmalar.filter((f) => f.durum === "AKTIF");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -47,8 +51,8 @@ export default function YeniPersonelPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Yeni Personel</h2>
-          <p className="text-muted-foreground">Sisteme yeni personel kaydı oluşturun</p>
+          <h2 className="text-2xl font-bold tracking-tight">Yeni Çalışan</h2>
+          <p className="text-muted-foreground">Sisteme yeni çalışan kaydı oluşturun</p>
         </div>
       </div>
 
@@ -81,16 +85,6 @@ export default function YeniPersonelPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">TC Kimlik No *</label>
-                <Input
-                  value={form.tcKimlik}
-                  onChange={(e) => handleChange("tcKimlik", e.target.value)}
-                  placeholder="11 haneli TC kimlik numarası"
-                  maxLength={11}
-                  required
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium">Doğum Tarihi *</label>
                 <Input
                   type="date"
@@ -109,13 +103,12 @@ export default function YeniPersonelPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">E-posta *</label>
+                <label className="text-sm font-medium">E-posta</label>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => handleChange("email", e.target.value)}
                   placeholder="ornek@email.com"
-                  required
                 />
               </div>
             </CardContent>
@@ -128,40 +121,21 @@ export default function YeniPersonelPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Firma *</label>
-                <Select
-                  value={form.firmaId}
-                  onChange={(e) => handleChange("firmaId", e.target.value)}
-                  options={aktifFirmalar.map((f) => ({ value: f.id, label: f.ad }))}
-                  placeholder="Firma seçiniz"
-                  required
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium">Pozisyon *</label>
-                <Input
+                <Select
                   value={form.pozisyon}
                   onChange={(e) => handleChange("pozisyon", e.target.value)}
-                  placeholder="Örn: Muhasebe Uzmanı"
+                  options={pozisyonlar.map((p) => ({ value: p, label: p }))}
+                  placeholder="Pozisyon seçiniz"
                   required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Departman *</label>
-                <Input
-                  value={form.departman}
-                  onChange={(e) => handleChange("departman", e.target.value)}
-                  placeholder="Örn: Finans"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">İşe Giriş Tarihi *</label>
+                <label className="text-sm font-medium">İşe Giriş Tarihi</label>
                 <Input
                   type="date"
                   value={form.isegirisTarihi}
                   onChange={(e) => handleChange("isegirisTarihi", e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -187,7 +161,7 @@ export default function YeniPersonelPage() {
           </Button>
           <Button type="submit">
             <Save className="mr-2 h-4 w-4" />
-            Personeli Kaydet
+            Çalışanı Kaydet
           </Button>
         </div>
       </form>

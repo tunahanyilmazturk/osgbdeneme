@@ -7,13 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { SEKTOR_LISTESI, ILLER } from "@/lib/constants";
+import { ILLER } from "@/lib/constants";
 import type { GenelDurum } from "@/types";
 import { ArrowLeft, Save } from "lucide-react";
 
 export default function YeniFirmaPage() {
   const router = useRouter();
-  const { firmaEkle } = useStore();
+  const { firmaEkle, sektorler } = useStore();
 
   const [form, setForm] = useState({
     ad: "",
@@ -83,7 +83,7 @@ export default function YeniFirmaPage() {
                 <Select
                   value={form.sektor}
                   onChange={(e) => handleChange("sektor", e.target.value)}
-                  options={SEKTOR_LISTESI.map((s) => ({ value: s, label: s }))}
+                  options={sektorler.map((s) => ({ value: s, label: s }))}
                   placeholder="Sektör seçiniz"
                   required
                 />

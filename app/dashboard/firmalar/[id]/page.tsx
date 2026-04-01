@@ -25,7 +25,7 @@ import {
 export default function FirmaDetayPage() {
   const router = useRouter();
   const params = useParams();
-  const { firmalar, personeller, randevular, teklifler, taramalar } = useStore();
+  const { firmalar, randevular, teklifler, taramalar } = useStore();
 
   const firma = firmalar.find((f) => f.id === params.id);
   if (!firma) {
@@ -41,19 +41,9 @@ export default function FirmaDetayPage() {
     );
   }
 
-  const firmaPersonelleri = personeller.filter((p) => p.firmaId === firma.id);
   const firmaRandevulari = randevular.filter((r) => r.firmaId === firma.id);
   const firmaTeklifleri = teklifler.filter((t) => t.firmaId === firma.id);
   const firmaTaramalari = taramalar.filter((t) => t.firmaId === firma.id);
-
-  const renkleri = [
-    "from-blue-500 to-indigo-600",
-    "from-emerald-500 to-teal-600",
-    "from-purple-500 to-violet-600",
-    "from-orange-500 to-red-500",
-    "from-pink-500 to-rose-600",
-    "from-cyan-500 to-blue-600",
-  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -83,8 +73,8 @@ export default function FirmaDetayPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Personel</p>
-                <p className="text-2xl font-bold">{firmaPersonelleri.length}</p>
+                <p className="text-xs text-muted-foreground">Çalışan Sayısı</p>
+                <p className="text-2xl font-bold">{firma.calisanSayisi}</p>
               </div>
               <div className="rounded-xl p-3 bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
                 <Users className="h-5 w-5" />
@@ -255,45 +245,6 @@ export default function FirmaDetayPage() {
           </Card>
         </div>
       </div>
-
-      {/* Firma Personelleri */}
-      {firmaPersonelleri.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Firma Personelleri ({firmaPersonelleri.length})
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/personel")}>
-                Tümünü Gör
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {firmaPersonelleri.map((personel, idx) => (
-                <div
-                  key={personel.id}
-                  className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/personel/${personel.id}`)}
-                >
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${renkleri[idx % renkleri.length]} text-white font-semibold text-xs`}>
-                    {personel.ad?.charAt(0)}{personel.soyad?.charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{personel.ad} {personel.soyad}</p>
-                    <p className="text-xs text-muted-foreground truncate">{personel.pozisyon}</p>
-                  </div>
-                  <Badge className={DURUM_RENKLERI[personel.durum]} variant="outline">
-                    {DURUM_ETIKETLERI[personel.durum]}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Son Randevular */}
       {firmaRandevulari.length > 0 && (

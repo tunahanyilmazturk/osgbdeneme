@@ -38,20 +38,18 @@ export interface Firma {
   olusturmaTarihi: string;
 }
 
+export type Pozisyon = string;
+
 // Personel
 export interface Personel {
   id: string;
   ad: string;
   soyad: string;
-  tcKimlik: string;
   telefon: string;
-  email: string;
+  email?: string;
   dogumTarihi: string;
-  isegirisTarihi: string;
-  pozisyon: string;
-  departman: string;
-  firmaId: string;
-  firmaAdi?: string;
+  isegirisTarihi?: string;
+  pozisyon: Pozisyon;
   durum: GenelDurum;
   olusturmaTarihi: string;
 }
@@ -69,10 +67,7 @@ export interface SaglikTesti {
   ad: string;
   kategoriId: string;
   kategoriAdi?: string;
-  aciklama: string;
   birimFiyat: number;
-  sure: number; // dakika cinsinden
-  periyot: number; // gün cinsinden (kaç günde bir tekrarlanacak)
   durum: GenelDurum;
   olusturmaTarihi: string;
 }

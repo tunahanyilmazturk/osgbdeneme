@@ -13,21 +13,18 @@ import { ArrowLeft, Save, Users } from "lucide-react";
 export default function PersonelDuzenlePage() {
   const router = useRouter();
   const params = useParams();
-  const { personeller, personelGuncelle, firmalar } = useStore();
+  const { personeller, personelGuncelle, pozisyonlar } = useStore();
 
   const personel = personeller.find((p) => p.id === params.id);
 
   const [form, setForm] = useState({
     ad: "",
     soyad: "",
-    tcKimlik: "",
     telefon: "",
     email: "",
     dogumTarihi: "",
     isegirisTarihi: "",
     pozisyon: "",
-    departman: "",
-    firmaId: "",
     durum: "AKTIF" as GenelDurum,
   });
 
@@ -36,14 +33,11 @@ export default function PersonelDuzenlePage() {
       setForm({
         ad: personel.ad,
         soyad: personel.soyad,
-        tcKimlik: personel.tcKimlik,
         telefon: personel.telefon,
-        email: personel.email,
+        email: personel.email || "",
         dogumTarihi: personel.dogumTarihi,
-        isegirisTarihi: personel.isegirisTarihi,
+        isegirisTarihi: personel.isegirisTarihi || "",
         pozisyon: personel.pozisyon,
-        departman: personel.departman,
-        firmaId: personel.firmaId,
         durum: personel.durum,
       });
     }
@@ -53,7 +47,7 @@ export default function PersonelDuzenlePage() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Users className="mb-4 h-12 w-12 text-muted-foreground" />
-        <p className="text-muted-foreground">Personel bulunamadı.</p>
+        <p className="text-muted-foreground">Çalışan bulunamadı.</p>
         <Button className="mt-4" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Geri Dön
@@ -64,15 +58,22 @@ export default function PersonelDuzenlePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    personelGuncelle(personel.id, form);
+    personelGuncelle(personel.id, {
+      ad: form.ad,
+      soyad: form.soyad,
+      telefon: form.telefon,
+      email: form.email || undefined,
+      dogumTarihi: form.dogumTarihi,
+      isegirisTarihi: form.isegirisTarihi || undefined,
+      pozisyon: form.pozisyon,
+      durum: form.durum,
+    });
     router.push(`/dashboard/personel/${personel.id}`);
   };
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
-
-  const aktifFirmalar = firmalar.filter((f) => f.durum === "AKTIF");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -81,7 +82,7 @@ export default function PersonelDuzenlePage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Personel Düzenle</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Çalışan Düzenle</h2>
           <p className="text-muted-foreground">{personel.ad} {personel.soyad} bilgilerini güncelleyin</p>
         </div>
       </div>
@@ -115,16 +116,6 @@ export default function PersonelDuzenlePage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">TC Kimlik No *</label>
-                <Input
-                  value={form.tcKimlik}
-                  onChange={(e) => handleChange("tcKimlik", e.target.value)}
-                  placeholder="11 haneli TC kimlik numarası"
-                  maxLength={11}
-                  required
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium">Doğum Tarihi *</label>
                 <Input
                   type="date"
@@ -143,13 +134,12 @@ export default function PersonelDuzenlePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">E-posta *</label>
+                <label className="text-sm font-medium">E-posta</label>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => handleChange("email", e.target.value)}
                   placeholder="ornek@email.com"
-                  required
                 />
               </div>
             </CardContent>
@@ -162,40 +152,21 @@ export default function PersonelDuzenlePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Firma *</label>
-                <Select
-                  value={form.firmaId}
-                  onChange={(e) => handleChange("firmaId", e.target.value)}
-                  options={aktifFirmalar.map((f) => ({ value: f.id, label: f.ad }))}
-                  placeholder="Firma seçiniz"
-                  required
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium">Pozisyon *</label>
-                <Input
+                <Select
                   value={form.pozisyon}
                   onChange={(e) => handleChange("pozisyon", e.target.value)}
-                  placeholder="Örn: Muhasebe Uzmanı"
+                  options={pozisyonlar.map((p) => ({ value: p, label: p }))}
+                  placeholder="Pozisyon seçiniz"
                   required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Departman *</label>
-                <Input
-                  value={form.departman}
-                  onChange={(e) => handleChange("departman", e.target.value)}
-                  placeholder="Örn: Finans"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">İşe Giriş Tarihi *</label>
+                <label className="text-sm font-medium">İşe Giriş Tarihi</label>
                 <Input
                   type="date"
                   value={form.isegirisTarihi}
                   onChange={(e) => handleChange("isegirisTarihi", e.target.value)}
-                  required
                 />
               </div>
               <div>

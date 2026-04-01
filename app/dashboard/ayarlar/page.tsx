@@ -11,15 +11,17 @@ import {
   Settings, User, Moon, Sun, Monitor, Save, Shield, Bell, Palette, 
   Lock, Mail, Phone, Building2, Globe, MapPin, Hash, CheckCircle2,
   AlertCircle, KeyRound, Languages, Clock, History, Trash2, Eye, EyeOff,
-  ShieldCheck, Download, UserCog, RotateCcw, Database, HelpCircle
+  ShieldCheck, Download, UserCog, RotateCcw, Database, HelpCircle, List, Plus, X,
+  TestTube2, Users
 } from "lucide-react";
 
-type AyarSekme = "profil" | "tercihler" | "sirket" | "guvenlik" | "bildirimler" | "oturumlar" | "veri";
+type AyarSekme = "profil" | "tercihler" | "sirket" | "guvenlik" | "bildirimler" | "oturumlar" | "veri" | "tanimlar";
 
 const menuler = [
   { id: "profil" as AyarSekme, ikon: User, baslik: "Profil", aciklama: "Kişisel bilgiler" },
   { id: "tercihler" as AyarSekme, ikon: Palette, baslik: "Tercihler", aciklama: "Görünüm & Dil" },
   { id: "sirket" as AyarSekme, ikon: Building2, baslik: "Şirket", aciklama: "Şirket bilgileri" },
+  { id: "tanimlar" as AyarSekme, ikon: List, baslik: "Tanımlar", aciklama: "Seçenek yönetimi" },
   { id: "guvenlik" as AyarSekme, ikon: Shield, baslik: "Güvenlik", aciklama: "Şifre & 2FA" },
   { id: "bildirimler" as AyarSekme, ikon: Bell, baslik: "Bildirimler", aciklama: "Bildirim tercihleri" },
   { id: "oturumlar" as AyarSekme, ikon: History, baslik: "Oturumlar", aciklama: "Aktif cihazlar" },
@@ -28,10 +30,14 @@ const menuler = [
 
 export default function AyarlarPage() {
   const { theme, setTheme } = useTheme();
-  const { kullanici } = useStore();
+  const { kullanici, testKategorileri, pozisyonlar, sektorler, kategoriEkle, kategoriSil, pozisyonEkle, pozisyonSil, sektorEkle, sektorSil } = useStore();
   const [mounted, setMounted] = useState(false);
   const [kaydedildi, setKaydedildi] = useState(false);
   const [aktifSekme, setAktifSekme] = useState<AyarSekme>("profil");
+
+  const [yeniKategori, setYeniKategori] = useState("");
+  const [yeniPozisyon, setYeniPozisyon] = useState("");
+  const [yeniSektor, setYeniSektor] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -374,6 +380,191 @@ export default function AyarlarPage() {
                 </Button>
               </CardContent>
             </Card>
+          )}
+
+          {/* Tanımlar */}
+          {aktifSekme === "tanimlar" && (
+            <div className="space-y-6">
+              {/* Test Kategorileri */}
+              <Card className="card-hover animate-fade-in">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-700 dark:bg-pink-950/50 dark:text-pink-400">
+                      <TestTube2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle>Test Kategorileri</CardTitle>
+                      <CardDescription>Sağlık testi kategorilerini yönetin</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={yeniKategori}
+                      onChange={(e) => setYeniKategori(e.target.value)}
+                      placeholder="Yeni kategori adı..."
+                      className="h-10"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && yeniKategori.trim()) {
+                          kategoriEkle(yeniKategori.trim());
+                          setYeniKategori("");
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (yeniKategori.trim()) {
+                          kategoriEkle(yeniKategori.trim());
+                          setYeniKategori("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1.5">
+                    {testKategorileri.map((kategori) => (
+                      <div
+                        key={kategori.id}
+                        className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                      >
+                        <span className="text-sm font-medium">{kategori.ad}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => kategoriSil(kategori.id)}
+                        >
+                          <X className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Pozisyonlar */}
+              <Card className="card-hover animate-fade-in">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle>Pozisyonlar</CardTitle>
+                      <CardDescription>Çalışan pozisyonlarını yönetin</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={yeniPozisyon}
+                      onChange={(e) => setYeniPozisyon(e.target.value)}
+                      placeholder="Yeni pozisyon adı..."
+                      className="h-10"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && yeniPozisyon.trim()) {
+                          pozisyonEkle(yeniPozisyon.trim());
+                          setYeniPozisyon("");
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (yeniPozisyon.trim()) {
+                          pozisyonEkle(yeniPozisyon.trim());
+                          setYeniPozisyon("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1.5">
+                    {pozisyonlar.map((pozisyon, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                      >
+                        <span className="text-sm font-medium">{pozisyon}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => pozisyonSil(index)}
+                        >
+                          <X className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sektörler */}
+              <Card className="card-hover animate-fade-in">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle>Sektörler</CardTitle>
+                      <CardDescription>Firma sektörlerini yönetin</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={yeniSektor}
+                      onChange={(e) => setYeniSektor(e.target.value)}
+                      placeholder="Yeni sektör adı..."
+                      className="h-10"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && yeniSektor.trim()) {
+                          sektorEkle(yeniSektor.trim());
+                          setYeniSektor("");
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (yeniSektor.trim()) {
+                          sektorEkle(yeniSektor.trim());
+                          setYeniSektor("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1.5">
+                    {sektorler.map((sektor, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                      >
+                        <span className="text-sm font-medium">{sektor}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => sektorSil(index)}
+                        >
+                          <X className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {/* Güvenlik */}
