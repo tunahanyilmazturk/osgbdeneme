@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useTeklifStore, useFirmaStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,8 @@ const durumIconlari: Record<string, typeof FileText> = {
 
 export default function TekliflerPage() {
   const router = useRouter();
-  const { teklifler, teklifSil, firmalar } = useStore();
+  const { teklifler, teklifSil } = useTeklifStore();
+  const { firmalar } = useFirmaStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [gorunum, setGorunum] = useState<GorunumModu>("kart");
   const [durumFilter, setDurumFilter] = useState<string>("");

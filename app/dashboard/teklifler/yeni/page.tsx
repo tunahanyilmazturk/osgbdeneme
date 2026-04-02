@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useTeklifStore, useFirmaStore, useSaglikTestiStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,9 @@ function onYaziOlustur(firma: any, kalemler: TeklifKalemi[], genelToplam: number
 
 export default function YeniTeklifPage() {
   const router = useRouter();
-  const { teklifEkle, firmalar, saglikTestleri } = useStore();
+  const { teklifEkle } = useTeklifStore();
+  const { firmalar } = useFirmaStore();
+  const { saglikTestleri } = useSaglikTestiStore();
 
   const [aktifAdim, setAktifAdim] = useState<Adim>(1);
   const [form, setForm] = useState({ firmaId: "", durum: "TASLAK" as TeklifDurumu, gecerlilikTarihi: "", notlar: "", kdvYuzde: 10 });

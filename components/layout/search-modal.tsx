@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useFirmaStore, usePersonelStore, useRandevuStore, useTeklifStore, useSaglikTestiStore, useTaramaStore } from "@/lib/stores";
 import {
   Search,
   Building2,
@@ -32,7 +32,12 @@ interface SearchResult {
 
 export default function SearchModal({ open, onClose }: SearchModalProps) {
   const router = useRouter();
-  const { firmalar, personeller, randevular, teklifler, saglikTestleri, taramalar } = useStore();
+  const { firmalar } = useFirmaStore();
+  const { personeller } = usePersonelStore();
+  const { randevular } = useRandevuStore();
+  const { teklifler } = useTeklifStore();
+  const { saglikTestleri } = useSaglikTestiStore();
+  const { taramalar } = useTaramaStore();
   const [query, setQuery] = useState("");
   const [seciliIndex, setSeciliIndex] = useState(0);
 

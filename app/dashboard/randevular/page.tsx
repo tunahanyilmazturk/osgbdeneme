@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useRandevuStore, useFirmaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,7 +49,8 @@ const durumIconlari: Record<string, typeof CheckCircle2> = {
 
 export default function RandevularPage() {
   const router = useRouter();
-  const { randevular, randevuSil, firmalar } = useStore();
+  const { randevular, randevuSil } = useRandevuStore();
+  const { firmalar } = useFirmaStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [gorunum, setGorunum] = useState<GorunumModu>("liste");
   const [durumFilter, setDurumFilter] = useState<string>("");
@@ -102,13 +103,13 @@ export default function RandevularPage() {
       <div className="page-header-gradient">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Randevular</h2>
-            <p className="text-muted-foreground">{randevular.length} randevu</p>
+            <h2 className="text-2xl font-bold tracking-tight">Taramalar</h2>
+            <p className="text-muted-foreground">{randevular.length} tarama</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="gradient" onClick={() => router.push("/dashboard/randevular/yeni")}>
               <Plus className="mr-2 h-4 w-4" />
-              Yeni Randevu
+              Yeni Tarama
             </Button>
           </div>
         </div>
@@ -120,7 +121,7 @@ export default function RandevularPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Bugünkü Randevu</p>
+                <p className="text-xs text-muted-foreground">Bugünkü Tarama</p>
                 <p className="text-2xl font-bold">{istatistikler.bugunku}</p>
               </div>
               <div className="rounded-xl p-3 bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
@@ -273,12 +274,12 @@ export default function RandevularPage() {
               <Calendar className="h-6 w-6" />
             </div>
             <p className="text-sm text-muted-foreground">
-              {searchTerm || filtrelerAktif ? "Arama kriterine uygun randevu bulunamadı." : "Randevu bulunamadı"}
+              {searchTerm || filtrelerAktif ? "Arama kriterine uygun tarama bulunamadı." : "Tarama bulunamadı"}
             </p>
             {!searchTerm && !filtrelerAktif && (
               <Button variant="gradient" className="mt-4" onClick={() => router.push("/dashboard/randevular/yeni")}>
                 <Plus className="mr-2 h-4 w-4" />
-                İlk Randevuyu Oluştur
+                İlk Taramayı Oluştur
               </Button>
             )}
           </CardContent>
@@ -326,7 +327,20 @@ export default function RandevularPage() {
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => router.push(`/dashboard/randevular/${randevu.id}`)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => router.push(`/dashboard/randevular/${randevu.id}`)}
+                      >
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
@@ -334,7 +348,7 @@ export default function RandevularPage() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => {
-                          if (confirm("Bu randevuyu silmek istediğinize emin misiniz?")) {
+                          if (confirm("Bu taramayı silmek istediğinize emin misiniz?")) {
                             randevuSil(randevu.id);
                           }
                         }}
@@ -389,7 +403,20 @@ export default function RandevularPage() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => router.push(`/dashboard/randevular/${randevu.id}`)}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => router.push(`/dashboard/randevular/${randevu.id}`)}
+                          >
                             <Edit className="h-3.5 w-3.5" />
                           </Button>
                           <Button
@@ -397,7 +424,7 @@ export default function RandevularPage() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => {
-                              if (confirm("Bu randevuyu silmek istediğinize emin misiniz?")) {
+                              if (confirm("Bu taramayı silmek istediğinize emin misiniz?")) {
                                 randevuSil(randevu.id);
                               }
                             }}

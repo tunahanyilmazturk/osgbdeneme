@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { usePersonelStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { ArrowLeft, Save, Users } from "lucide-react";
 export default function PersonelDuzenlePage() {
   const router = useRouter();
   const params = useParams();
-  const { personeller, personelGuncelle, pozisyonlar } = useStore();
+  const { personeller, personelGuncelle, pozisyonlar } = usePersonelStore();
 
   const personel = personeller.find((p) => p.id === params.id);
 

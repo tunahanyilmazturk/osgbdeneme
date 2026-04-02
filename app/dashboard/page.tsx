@@ -1,6 +1,6 @@
 "use client";
 
-import { useStore } from "@/lib/store";
+import { useDashboardStats, useSonAktiviteler } from "@/lib/hooks";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,70 +19,59 @@ import {
 import Link from "next/link";
 
 export default function DashboardPage() {
-  const { firmalar, personeller, randevular, taramalar, teklifler, saglikTestleri } = useStore();
+  const stats = useDashboardStats();
+  const { sonRandevular, sonTaramalar } = useSonAktiviteler(5);
 
-  const bekleyenRandevular = randevular.filter((r) => r.durum === "BEKLEMEDE").length;
-  const bugunRandevular = randevular.filter((r) => {
-    const bugun = new Date().toISOString().split("T")[0];
-    return r.tarih === bugun;
-  }).length;
-  const toplamGelir = teklifler
-    .filter((t) => t.durum === "KABUL_EDİLDİ")
-    .reduce((sum, t) => sum + t.genelToplam, 0);
-
-  const stats = [
+  const statCards = [
     {
       baslik: "Toplam Firma",
-      deger: firmalar.length,
-      alt: `${firmalar.filter((f) => f.durum === "AKTIF").length} aktif`,
+      deger: stats.firmaSayisi,
+      alt: `${stats.aktifFirmaSayisi} aktif`,
       ikon: Building2,
       gradient: "gradient-primary",
       statClass: "stat-card-blue",
     },
     {
       baslik: "Personel",
-      deger: personeller.length,
-      alt: `${personeller.filter((p) => p.durum === "AKTIF").length} aktif`,
+      deger: stats.personelSayisi,
+      alt: `${stats.aktifPersonelSayisi} aktif`,
       ikon: Users,
       gradient: "gradient-success",
       statClass: "stat-card-green",
     },
     {
-      baslik: "Randevular",
-      deger: randevular.length,
-      alt: `${bekleyenRandevular} bekleyen`,
+      baslik: "Taramalar",
+      deger: stats.randevuSayisi,
+      alt: `${stats.bekleyenRandevuSayisi} bekleyen`,
       ikon: Calendar,
       gradient: "gradient-info",
       statClass: "stat-card-cyan",
     },
     {
       baslik: "Taramalar",
-      deger: taramalar.length,
-      alt: `${taramalar.filter((t) => t.durum === "DEVAM_EDIYOR").length} devam eden`,
+      deger: stats.taramaSayisi,
+      alt: `${stats.devamEdenTaramaSayisi} devam eden`,
       ikon: Activity,
       gradient: "gradient-warning",
       statClass: "stat-card-orange",
     },
     {
       baslik: "Teklifler",
-      deger: teklifler.length,
-      alt: `${teklifler.filter((t) => t.durum === "TASLAK").length} taslak`,
+      deger: stats.teklifSayisi,
+      alt: `${stats.taslakTeklifSayisi} taslak`,
       ikon: FileText,
       gradient: "gradient-danger",
       statClass: "stat-card-purple",
     },
     {
       baslik: "Toplam Gelir",
-      deger: formatPara(toplamGelir),
+      deger: formatPara(stats.toplamGelir),
       alt: "Kabul edilen teklifler",
       ikon: TrendingUp,
       gradient: "gradient-success",
       statClass: "stat-card-green",
     },
   ];
-
-  const sonRandevular = [...randevular].reverse().slice(0, 5);
-  const sonTaramalar = [...taramalar].reverse().slice(0, 5);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -113,20 +102,23 @@ export default function DashboardPage() {
 
       {/* İstatistik Kartları */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
-        {stats.map((stat) => (
-          <Card key={stat.baslik} className={`card-hover stat-card ${stat.statClass}`}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+        {statCards.map((stat, idx) => (
+          <Card key={stat.baslik} className={`card-luxury stat-card ${stat.statClass} group overflow-hidden`}>
+            <CardContent className="p-6 relative">
+              {/* Decorative gradient circle */}
+              <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="flex items-center justify-between relative">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">
                     {stat.baslik}
                   </p>
-                  <p className="text-2xl font-bold tracking-tight">
+                  <p className="text-2xl font-bold tracking-tight count-animation">
                     {stat.deger}
                   </p>
                   <p className="text-xs text-muted-foreground">{stat.alt}</p>
                 </div>
-                <div className={`rounded-xl p-3 text-white ${stat.gradient}`}>
+                <div className={`rounded-xl p-3 text-white ${stat.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <stat.ikon className="h-6 w-6" />
                 </div>
               </div>
@@ -137,13 +129,13 @@ export default function DashboardPage() {
 
       {/* İki Sütunlu İçerik */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Son Randevular */}
+        {/* Son Taramalar */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                Son Randevular
+                Son Taramalar
               </CardTitle>
               <Link href="/dashboard/randevular">
                 <Button variant="ghost" size="sm">
@@ -266,34 +258,45 @@ export default function DashboardPage() {
       </div>
 
       {/* Hızlı İşlemler */}
-      <Card>
+      <Card className="card-elevated">
         <CardHeader>
-          <CardTitle>Hızlı İşlemler</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Hızlı İşlemler
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Link href="/dashboard/firmalar/yeni">
-              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 card-hover">
-                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm">Yeni Firma</span>
+            <Link href="/dashboard/firmalar/yeni" className="group">
+              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 btn-shine hover-lift border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600">
+                <div className="rounded-lg p-2 bg-blue-100 dark:bg-blue-950 group-hover:bg-blue-200 dark:group-hover:bg-blue-900 transition-colors">
+                  <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-sm font-medium">Yeni Firma</span>
               </Button>
             </Link>
-            <Link href="/dashboard/personel/yeni">
-              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 card-hover">
-                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <span className="text-sm">Yeni Personel</span>
+            <Link href="/dashboard/personel/yeni" className="group">
+              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 btn-shine hover-lift border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600">
+                <div className="rounded-lg p-2 bg-green-100 dark:bg-green-950 group-hover:bg-green-200 dark:group-hover:bg-green-900 transition-colors">
+                  <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-sm font-medium">Yeni Personel</span>
               </Button>
             </Link>
-            <Link href="/dashboard/randevular/yeni">
-              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 card-hover">
-                <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                <span className="text-sm">Yeni Randevu</span>
+            <Link href="/dashboard/randevular/yeni" className="group">
+              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 btn-shine hover-lift border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600">
+                <div className="rounded-lg p-2 bg-purple-100 dark:bg-purple-950 group-hover:bg-purple-200 dark:group-hover:bg-purple-900 transition-colors">
+                  <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-sm font-medium">Yeni Tarama</span>
               </Button>
             </Link>
-            <Link href="/dashboard/teklifler/yeni">
-              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 card-hover">
-                <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                <span className="text-sm">Yeni Teklif</span>
+            <Link href="/dashboard/teklifler/yeni" className="group">
+              <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2 btn-shine hover-lift border-orange-200 dark:border-orange-800 hover:border-orange-400 dark:hover:border-orange-600">
+                <div className="rounded-lg p-2 bg-orange-100 dark:bg-orange-950 group-hover:bg-orange-200 dark:group-hover:bg-orange-900 transition-colors">
+                  <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <span className="text-sm font-medium">Yeni Teklif</span>
               </Button>
             </Link>
           </div>

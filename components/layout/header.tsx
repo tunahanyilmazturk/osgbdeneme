@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Moon, Sun, Bell, LogOut, Search, Maximize2, RefreshCw, X, Check } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useStore } from "@/lib/store";
+import { useAuthStore, useBildirimStore } from "@/lib/stores";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,8 @@ export default function Header() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { kullanici, bildirimler, bildirimOkundu, cikisYap } = useStore();
+  const { kullanici, cikisYap } = useAuthStore();
+  const { bildirimler, bildirimOkundu } = useBildirimStore();
   const okunmamisBildirim = bildirimler.filter((b) => !b.okundu).length;
 
   const [searchOpen, setSearchOpen] = useState(false);

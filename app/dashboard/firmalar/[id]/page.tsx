@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useFirmaStore, useRandevuStore, useTeklifStore, useTaramaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,10 @@ import {
 export default function FirmaDetayPage() {
   const router = useRouter();
   const params = useParams();
-  const { firmalar, randevular, teklifler, taramalar } = useStore();
+  const { firmalar } = useFirmaStore();
+  const { randevular } = useRandevuStore();
+  const { teklifler } = useTeklifStore();
+  const { taramalar } = useTaramaStore();
 
   const firma = firmalar.find((f) => f.id === params.id);
   if (!firma) {
@@ -86,7 +89,7 @@ export default function FirmaDetayPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Randevu</p>
+                <p className="text-xs text-muted-foreground">Tarama</p>
                 <p className="text-2xl font-bold">{firmaRandevulari.length}</p>
               </div>
               <div className="rounded-xl p-3 bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400">
@@ -225,17 +228,13 @@ export default function FirmaDetayPage() {
 
           {/* Hızlı İşlemler */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader>
               <CardTitle className="text-base">Hızlı İşlemler</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => router.push("/dashboard/randevular/yeni")}>
                 <Calendar className="mr-2 h-4 w-4" />
-                Yeni Randevu Oluştur
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => router.push("/dashboard/teklifler/yeni")}>
-                <FileText className="mr-2 h-4 w-4" />
-                Yeni Teklif Hazırla
+                Yeni Tarama Oluştur
               </Button>
               <Button variant="outline" className="w-full justify-start" size="sm" onClick={() => router.push("/dashboard/personel/yeni")}>
                 <Users className="mr-2 h-4 w-4" />
@@ -246,14 +245,14 @@ export default function FirmaDetayPage() {
         </div>
       </div>
 
-      {/* Son Randevular */}
+      {/* Son Taramalar */}
       {firmaRandevulari.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Son Randevular
+                Son Taramalar
               </CardTitle>
               <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/randevular")}>
                 Tümünü Gör

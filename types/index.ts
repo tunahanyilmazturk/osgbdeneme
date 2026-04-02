@@ -86,6 +86,7 @@ export interface Randevu {
   bitisSaati: string;
   durum: RandevuDurumu;
   notlar?: string;
+  sonuc?: string;
   olusturmaTarihi: string;
 }
 

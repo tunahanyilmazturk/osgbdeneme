@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useStore } from "@/lib/store";
+import { useFirmaStore, usePersonelStore, useRandevuStore, useTaramaStore, useTeklifStore, useSaglikTestiStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,12 @@ const durumRenkleri = ["#3b82f6", "#22c55e", "#8b5cf6", "#f59e0b", "#ef4444", "#
 const PIE_COLORS = ["#3b82f6", "#22c55e", "#8b5cf6", "#f59e0b", "#ef4444"];
 
 export default function RaporlarPage() {
-  const { firmalar, personeller, randevular, taramalar, teklifler, saglikTestleri } = useStore();
+  const { firmalar } = useFirmaStore();
+  const { personeller } = usePersonelStore();
+  const { randevular } = useRandevuStore();
+  const { taramalar } = useTaramaStore();
+  const { teklifler } = useTeklifStore();
+  const { saglikTestleri } = useSaglikTestiStore();
   const [donem, setDonem] = useState<"aylik" | "haftalik" | "yillik">("aylik");
 
   const toplamGelir = teklifler.filter((t) => t.durum === "KABUL_EDİLDİ").reduce((sum, t) => sum + t.genelToplam, 0);

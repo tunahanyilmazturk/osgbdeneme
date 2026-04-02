@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useSaglikTestiStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { ArrowLeft, Save, DollarSign } from "lucide-react";
 
 export default function YeniTestPage() {
   const router = useRouter();
-  const { testEkle, testKategorileri } = useStore();
+  const { testEkle, testKategorileri } = useSaglikTestiStore();
 
   const [form, setForm] = useState({
     ad: "",

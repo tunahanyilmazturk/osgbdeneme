@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useFirmaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { ArrowLeft, Save } from "lucide-react";
 
 export default function YeniFirmaPage() {
   const router = useRouter();
-  const { firmaEkle, sektorler } = useStore();
+  const { firmaEkle, sektorler } = useFirmaStore();
 
   const [form, setForm] = useState({
     ad: "",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { useStore } from "@/lib/store";
+import { useAuthStore, useSaglikTestiStore, usePersonelStore, useFirmaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,10 @@ const menuler = [
 
 export default function AyarlarPage() {
   const { theme, setTheme } = useTheme();
-  const { kullanici, testKategorileri, pozisyonlar, sektorler, kategoriEkle, kategoriSil, pozisyonEkle, pozisyonSil, sektorEkle, sektorSil } = useStore();
+  const { kullanici } = useAuthStore();
+  const { testKategorileri, kategoriEkle, kategoriSil } = useSaglikTestiStore();
+  const { pozisyonlar, pozisyonEkle, pozisyonSil } = usePersonelStore();
+  const { sektorler, sektorEkle, sektorSil } = useFirmaStore();
   const [mounted, setMounted] = useState(false);
   const [kaydedildi, setKaydedildi] = useState(false);
   const [aktifSekme, setAktifSekme] = useState<AyarSekme>("profil");
@@ -60,7 +63,7 @@ export default function AyarlarPage() {
   });
 
   const [bildirimler, setBildirimler] = useState([
-    { id: 1, ad: "Yeni randevu bildirimleri", aciklama: "Yeni randevu oluşturulduğunda bildirim alın", aktif: true },
+    { id: 1, ad: "Yeni tarama bildirimleri", aciklama: "Yeni tarama oluşturulduğunda bildirim alın", aktif: true },
     { id: 2, ad: "Teklif güncellemeleri", aciklama: "Teklifler kabul/red edildiğinde bildirim alın", aktif: true },
     { id: 3, ad: "Tarama hatırlatıcıları", aciklama: "Yaklaşan taramalar için hatırlatma alın", aktif: true },
     { id: 4, ad: "E-posta bildirimleri", aciklama: "Önemli güncellemeler için e-posta alın", aktif: false },

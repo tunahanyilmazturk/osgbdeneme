@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useAuthStore, useSidebarStore } from "@/lib/stores";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -12,7 +12,6 @@ import {
   TestTube2,
   Calendar,
   CalendarDays,
-  ClipboardList,
   FileText,
   TrendingUp,
   Settings,
@@ -67,7 +66,7 @@ const menuGroups = [
     label: "Planlama",
     items: [
       {
-        title: "Randevular",
+        title: "Taramalar",
         href: "/dashboard/randevular",
         icon: Calendar,
         color: "text-purple-600 dark:text-purple-400",
@@ -79,13 +78,6 @@ const menuGroups = [
         icon: CalendarDays,
         color: "text-cyan-600 dark:text-cyan-400",
         bg: "bg-cyan-50 dark:bg-cyan-950/50",
-      },
-      {
-        title: "Taramalar",
-        href: "/dashboard/taramalar",
-        icon: ClipboardList,
-        color: "text-amber-600 dark:text-amber-400",
-        bg: "bg-amber-50 dark:bg-amber-950/50",
       },
     ],
   },
@@ -125,7 +117,8 @@ const menuGroups = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { kullanici, cikisYap, sidebarCollapsed, toggleSidebar } = useStore();
+  const { cikisYap } = useAuthStore();
+  const { sidebarCollapsed, toggleSidebar } = useSidebarStore();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleCikis = () => {

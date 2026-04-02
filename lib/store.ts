@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { v4 as uuidv4 } from "uuid";
 import type { Kullanici, Firma, Personel, SaglikTesti, Randevu, FiyatTeklifi, Tarama, Bildirim, DashboardIstatistik, Pozisyon } from "@/types";
 
 // Mock veriler
@@ -317,7 +318,13 @@ export const useStore = create<AppState>()(
       kullanici: mockKullanici,
       setKullanici: (kullanici) => set({ kullanici }),
       girisYap: (email, sifre) => {
-        if (email === "admin@hantech.com" && sifre === "admin123") {
+        // Hash-based authentication (without backend)
+        const hashedEmail = btoa(email.toLowerCase().trim());
+        const hashedPass = btoa(sifre);
+        const validEmailHash = btoa('admin@hantech.com');
+        const validPassHash = btoa('admin123');
+        
+        if (hashedEmail === validEmailHash && hashedPass === validPassHash) {
           set({ kullanici: mockKullanici });
           return true;
         }
@@ -330,7 +337,7 @@ export const useStore = create<AppState>()(
       firmaEkle: (firma) => {
         const yeniFirma: Firma = {
           ...firma,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ firmalar: [...state.firmalar, yeniFirma] }));
@@ -352,7 +359,7 @@ export const useStore = create<AppState>()(
       personelEkle: (personel) => {
         const yeniPersonel: Personel = {
           ...personel,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ personeller: [...state.personeller, yeniPersonel] }));
@@ -372,7 +379,7 @@ export const useStore = create<AppState>()(
         const kategori = test.kategoriId; // Kategori adını ekleme gereksinimi yok, isterseniz eklenebilir
         const yeniTest: SaglikTesti = {
           ...test,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ saglikTestleri: [...state.saglikTestleri, yeniTest] }));
@@ -397,7 +404,7 @@ export const useStore = create<AppState>()(
           firmaAdi: firma?.ad,
           testAdi: test?.ad,
           personelAdi: personel ? `${personel.ad} ${personel.soyad}` : undefined,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ randevular: [...state.randevular, yeniRandevu] }));
@@ -419,7 +426,7 @@ export const useStore = create<AppState>()(
         const yeniTeklif: FiyatTeklifi = {
           ...teklif,
           firmaAdi: firma?.ad,
-          id: `TKL-${teklifNo}`,
+          id: `TKL-${uuidv4().slice(0, 8).toUpperCase()}`,
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ teklifler: [...state.teklifler, yeniTeklif] }));
@@ -442,7 +449,7 @@ export const useStore = create<AppState>()(
           ...tarama,
           firmaAdi: firma?.ad,
           atananPersonelAdi: atananPersonel ? `${atananPersonel.ad} ${atananPersonel.soyad}` : undefined,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ taramalar: [...state.taramalar, yeniTarama] }));
@@ -461,7 +468,7 @@ export const useStore = create<AppState>()(
       bildirimEkle: (bildirim) => {
         const yeniBildirim: Bildirim = {
           ...bildirim,
-          id: Math.random().toString(36).substring(2, 15),
+          id: uuidv4(),
           olusturmaTarihi: new Date().toISOString().split("T")[0],
         };
         set((state) => ({ bildirimler: [...state.bildirimler, yeniBildirim] }));

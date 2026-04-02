@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { usePersonelStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { ArrowLeft, Save } from "lucide-react";
 
 export default function YeniPersonelPage() {
   const router = useRouter();
-  const { personelEkle, pozisyonlar } = useStore();
+  const { personelEkle, pozisyonlar } = usePersonelStore();
 
   const [form, setForm] = useState({
     ad: "",

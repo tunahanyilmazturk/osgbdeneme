@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useSaglikTestiStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ type Siralama = "ad" | "kategori" | "fiyat" | "durum";
 
 export default function SaglikTestleriPage() {
   const router = useRouter();
-  const { saglikTestleri, testSil, testKategorileri, testEkle, testGuncelle } = useStore();
+  const { saglikTestleri, testSil, testKategorileri, testEkle, testGuncelle } = useSaglikTestiStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [gorunum, setGorunum] = useState<GorunumModu>("liste");
   const [durumFilter, setDurumFilter] = useState<string>("");

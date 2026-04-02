@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useTeklifStore, useFirmaStore } from "@/lib/stores";
 import { formatPara } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,8 @@ const durumIconlari: Record<string, typeof Clock> = {
 export default function TeklifDetayPage() {
   const router = useRouter();
   const params = useParams();
-  const { teklifler, teklifGuncelle, firmalar } = useStore();
+  const { teklifler, teklifGuncelle } = useTeklifStore();
+  const { firmalar } = useFirmaStore();
 
   const teklif = teklifler.find((t) => t.id === params.id);
   if (!teklif) {

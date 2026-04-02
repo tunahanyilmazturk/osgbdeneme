@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useStore } from "@/lib/store";
+import { useRandevuStore, useTaramaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,8 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 export default function TakvimPage() {
-  const { randevular, taramalar } = useStore();
+  const { randevular } = useRandevuStore();
+  const { taramalar } = useTaramaStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();

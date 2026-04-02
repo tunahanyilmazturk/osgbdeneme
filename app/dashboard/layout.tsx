@@ -2,14 +2,14 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
-import { useStore } from "@/lib/store";
+import { useSidebarStore } from "@/lib/stores";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarCollapsed } = useStore();
+  const { sidebarCollapsed } = useSidebarStore();
 
   return (
     <div className="min-h-screen">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { usePersonelStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,12 +33,52 @@ type Siralama = "ad" | "pozisyon" | "tarih" | "durum";
 
 export default function PersonelPage() {
   const router = useRouter();
-  const { personeller, personelSil, pozisyonlar } = useStore();
+  const { personeller, personelSil, pozisyonlar } = usePersonelStore();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [gorunum, setGorunum] = useState<GorunumModu>("liste");
   const [durumFilter, setDurumFilter] = useState<string>("");
   const [pozisyonFilter, setPozisyonFilter] = useState<string>("");
   const [siralama, setSiralama] = useState<Siralama>("tarih");
+
+  // Memoized callbacks
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  const handleDurumFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDurumFilter(e.target.value);
+  }, []);
+
+  const handlePozisyonFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPozisyonFilter(e.target.value);
+  }, []);
+
+  const handleSiralamaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSiralama(e.target.value as Siralama);
+  }, []);
+
+  const handleGorunumKart = useCallback(() => setGorunum("kart"), []);
+  const handleGorunumListe = useCallback(() => setGorunum("liste"), []);
+
+  const handleClearFilters = useCallback(() => {
+    setDurumFilter("");
+    setPozisyonFilter("");
+  }, []);
+
+  const handleExport = useCallback(() => {
+    exportPersoneller(personeller);
+  }, [personeller]);
+
+  const handleNewPersonel = useCallback(() => {
+    router.push("/dashboard/personel/yeni");
+  }, [router]);
+
+  const handleDeletePersonel = useCallback((id: string, ad: string, soyad: string) => {
+    if (confirm(`${ad} ${soyad} çalışanını silmek istediğinize emin misiniz?`)) {
+      personelSil(id);
+    }
+  }, [personelSil]);
 
   const filteredPersoneller = useMemo(() => {
     let sonuc = personeller.filter(
@@ -74,23 +114,34 @@ export default function PersonelPage() {
     return sonuc;
   }, [personeller, searchTerm, durumFilter, pozisyonFilter, siralama]);
 
+  // Optimized istatistikler - single pass
   const istatistikler = useMemo(() => {
-    const aktif = personeller.filter((p) => p.durum === "AKTIF").length;
-    const pasif = personeller.filter((p) => p.durum === "PASIF").length;
-    const beklemede = personeller.filter((p) => p.durum === "BEKLEMEDE").length;
+    let aktif = 0;
+    let pasif = 0;
+    let beklemede = 0;
+    
+    for (const p of personeller) {
+      if (p.durum === "AKTIF") aktif++;
+      else if (p.durum === "PASIF") pasif++;
+      else if (p.durum === "BEKLEMEDE") beklemede++;
+    }
+    
     return { aktif, pasif, beklemede, toplam: personeller.length };
   }, [personeller]);
 
-  const getInitials = (ad: string, soyad: string) => `${ad?.charAt(0) || ""}${soyad?.charAt(0) || ""}`;
+  // Memoized helper functions
+  const getInitials = useCallback((ad: string, soyad: string) => 
+    `${ad?.charAt(0) || ""}${soyad?.charAt(0) || ""}`, 
+  []);
 
-  const renkleri = [
+  const renkleri = useMemo(() => [
     "from-blue-500 to-indigo-600",
     "from-emerald-500 to-teal-600",
     "from-purple-500 to-violet-600",
     "from-orange-500 to-red-500",
     "from-pink-500 to-rose-600",
     "from-cyan-500 to-blue-600",
-  ];
+  ], []);
 
   const filtrelerAktif = durumFilter || pozisyonFilter;
 
@@ -107,13 +158,13 @@ export default function PersonelPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => exportPersoneller(personeller)}
+              onClick={handleExport}
               disabled={personeller.length === 0}
             >
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Excel
             </Button>
-            <Button variant="gradient" onClick={() => router.push("/dashboard/personel/yeni")}>
+            <Button variant="gradient" onClick={handleNewPersonel}>
               <Plus className="mr-2 h-4 w-4" />
               Yeni Çalışan
             </Button>
@@ -188,7 +239,7 @@ export default function PersonelPage() {
                 <Input
                   placeholder="Ad, soyad, pozisyon veya e-posta ile ara..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="pl-10"
                 />
               </div>
@@ -215,7 +266,7 @@ export default function PersonelPage() {
               <Filter className="h-4 w-4 text-muted-foreground" />
               <select
                 value={durumFilter}
-                onChange={(e) => setDurumFilter(e.target.value)}
+                onChange={handleDurumFilterChange}
                 className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Tüm Durumlar</option>
@@ -225,7 +276,7 @@ export default function PersonelPage() {
               </select>
               <select
                 value={pozisyonFilter}
-                onChange={(e) => setPozisyonFilter(e.target.value)}
+                onChange={handlePozisyonFilterChange}
                 className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Tüm Pozisyonlar</option>
@@ -237,7 +288,7 @@ export default function PersonelPage() {
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 <select
                   value={siralama}
-                  onChange={(e) => setSiralama(e.target.value as Siralama)}
+                  onChange={handleSiralamaChange}
                   className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="tarih">En Yeni</option>
@@ -250,10 +301,7 @@ export default function PersonelPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    setDurumFilter("");
-                    setPozisyonFilter("");
-                  }}
+                  onClick={handleClearFilters}
                   className="text-xs"
                 >
                   Filtreleri Temizle
@@ -285,7 +333,7 @@ export default function PersonelPage() {
                 : "Henüz kayıtlı çalışan bulunmuyor."}
             </p>
             {!searchTerm && !filtrelerAktif && (
-              <Button variant="gradient" className="mt-4" onClick={() => router.push("/dashboard/personel/yeni")}>
+              <Button variant="gradient" className="mt-4" onClick={handleNewPersonel}>
                 <Plus className="mr-2 h-4 w-4" />
                 İlk Çalışanı Ekle
               </Button>
@@ -348,11 +396,7 @@ export default function PersonelPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      if (confirm(`${personel.ad} ${personel.soyad} çalışanını silmek istediğinize emin misiniz?`)) {
-                        personelSil(personel.id);
-                      }
-                    }}
+                    onClick={() => handleDeletePersonel(personel.id, personel.ad, personel.soyad)}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                   </Button>

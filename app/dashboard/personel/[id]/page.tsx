@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { usePersonelStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
 export default function PersonelDetayPage() {
   const router = useRouter();
   const params = useParams();
-  const { personeller } = useStore();
+  const { personeller } = usePersonelStore();
 
   const personel = personeller.find((p) => p.id === params.id);
   if (!personel) {

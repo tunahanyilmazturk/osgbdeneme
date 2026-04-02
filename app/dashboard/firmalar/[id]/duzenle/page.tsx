@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useFirmaStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { ArrowLeft, Save, Building2 } from "lucide-react";
 export default function FirmaDuzenlePage() {
   const router = useRouter();
   const params = useParams();
-  const { firmalar, firmaGuncelle, sektorler } = useStore();
+  const { firmalar, firmaGuncelle, sektorler } = useFirmaStore();
 
   const firma = firmalar.find((f) => f.id === params.id);
 

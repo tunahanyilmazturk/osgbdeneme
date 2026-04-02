@@ -1,34 +1,33 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useFirmaStore, useRandevuStore, useTeklifStore } from "@/lib/stores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select } from "@/components/ui/select";
 import { DURUM_RENKLERI, DURUM_ETIKETLERI } from "@/lib/constants";
 import { exportFirmalar } from "@/lib/export";
+import { FirmaCard, FirmaListItem, useFirmaStats } from "@/components/firma-components";
 import {
   Building2,
-  Phone,
-  Mail,
-  MapPin,
-  Users,
   Plus,
   Search,
-  Edit,
-  Trash2,
-  Eye,
-  ArrowRight,
   FileSpreadsheet,
   Filter,
   ArrowUpDown,
   Calendar,
   TrendingUp,
   CheckCircle2,
-  Clock,
+  Users,
+  MapPin,
+  Phone,
+  Mail,
+  Eye,
+  Edit,
+  Trash2,
+  ArrowRight,
 } from "lucide-react";
 
 type GorunumModu = "kart" | "liste";
@@ -36,12 +35,52 @@ type Siralama = "ad" | "sektor" | "il" | "tarih" | "calisan";
 
 export default function FirmalarPage() {
   const router = useRouter();
-  const { firmalar, firmaSil, randevular, teklifler } = useStore();
+  const { firmalar, firmaSil } = useFirmaStore();
+  const { randevular } = useRandevuStore();
+  const { teklifler } = useTeklifStore();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [gorunum, setGorunum] = useState<GorunumModu>("liste");
   const [durumFilter, setDurumFilter] = useState<string>("");
   const [sektorFilter, setSektorFilter] = useState<string>("");
   const [siralama, setSiralama] = useState<Siralama>("tarih");
+
+  // Memoized callbacks for event handlers
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  const handleDurumFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDurumFilter(e.target.value);
+  }, []);
+
+  const handleSektorFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSektorFilter(e.target.value);
+  }, []);
+
+  const handleSiralamaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSiralama(e.target.value as Siralama);
+  }, []);
+
+  const handleGorunumKart = useCallback(() => setGorunum("kart"), []);
+  const handleGorunumListe = useCallback(() => setGorunum("liste"), []);
+
+  const handleClearFilters = useCallback(() => {
+    setDurumFilter("");
+    setSektorFilter("");
+  }, []);
+
+  const handleExport = useCallback(() => {
+    exportFirmalar(firmalar);
+  }, [firmalar]);
+
+  const handleNewFirma = useCallback(() => {
+    router.push("/dashboard/firmalar/yeni");
+  }, [router]);
+
+  const handleDeleteFirma = useCallback((id: string) => {
+    firmaSil(id);
+  }, [firmaSil]);
 
   const sektorler = useMemo(() => {
     const unique = [...new Set(firmalar.map((f) => f.sektor))];
@@ -109,7 +148,7 @@ export default function FirmalarPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => exportFirmalar(firmalar)}
+              onClick={handleExport}
               disabled={firmalar.length === 0}
             >
               <FileSpreadsheet className="mr-2 h-4 w-4" />
@@ -155,7 +194,7 @@ export default function FirmalarPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Randevular</p>
+                <p className="text-xs text-muted-foreground">Taramalar</p>
                 <p className="text-2xl font-bold">{istatistikler.toplamRandevu}</p>
               </div>
               <div className="rounded-xl p-3 bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400">
@@ -190,20 +229,20 @@ export default function FirmalarPage() {
                 <Input
                   placeholder="Firma adı, sektör, şehir veya yetkili ile ara..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="pl-10"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex rounded-lg bg-muted p-1">
                   <button
-                    onClick={() => setGorunum("kart")}
+                    onClick={handleGorunumKart}
                     className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${gorunum === "kart" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
                   >
                     Kart
                   </button>
                   <button
-                    onClick={() => setGorunum("liste")}
+                    onClick={handleGorunumListe}
                     className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${gorunum === "liste" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
                   >
                     Liste
@@ -217,7 +256,7 @@ export default function FirmalarPage() {
               <Filter className="h-4 w-4 text-muted-foreground" />
               <select
                 value={durumFilter}
-                onChange={(e) => setDurumFilter(e.target.value)}
+                onChange={handleDurumFilterChange}
                 className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Tüm Durumlar</option>
@@ -227,7 +266,7 @@ export default function FirmalarPage() {
               </select>
               <select
                 value={sektorFilter}
-                onChange={(e) => setSektorFilter(e.target.value)}
+                onChange={handleSektorFilterChange}
                 className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Tüm Sektörler</option>
@@ -239,7 +278,7 @@ export default function FirmalarPage() {
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 <select
                   value={siralama}
-                  onChange={(e) => setSiralama(e.target.value as Siralama)}
+                  onChange={handleSiralamaChange}
                   className="rounded-lg border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="tarih">En Yeni</option>
@@ -253,10 +292,7 @@ export default function FirmalarPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    setDurumFilter("");
-                    setSektorFilter("");
-                  }}
+                  onClick={handleClearFilters}
                   className="text-xs"
                 >
                   Filtreleri Temizle
@@ -291,7 +327,7 @@ export default function FirmalarPage() {
               <Button
                 variant="gradient"
                 className="mt-4"
-                onClick={() => router.push("/dashboard/firmalar/yeni")}
+                onClick={handleNewFirma}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 İlk Firmayı Oluştur
@@ -347,7 +383,7 @@ export default function FirmalarPage() {
                   <div className="flex gap-2 pt-1">
                     <div className="flex-1 flex items-center gap-1.5 rounded-md bg-muted/50 px-2 py-1.5">
                       <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                      <span className="text-xs text-muted-foreground">{firmaRandevulari.length} randevu</span>
+                      <span className="text-xs text-muted-foreground">{firmaRandevulari.length} tarama</span>
                     </div>
                     <div className="flex-1 flex items-center gap-1.5 rounded-md bg-muted/50 px-2 py-1.5">
                       <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
@@ -377,11 +413,7 @@ export default function FirmalarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        if (confirm(`${firma.ad} firmasını silmek istediğinize emin misiniz?`)) {
-                          firmaSil(firma.id);
-                        }
-                      }}
+                      onClick={() => handleDeleteFirma(firma.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
